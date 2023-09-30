@@ -1,0 +1,20 @@
+
+
+#textbox {
+  padding: 1em;
+  font-family: monospace;
+
+  font-size: 1.4em;
+}
+
+.item-active {
+  background-color: black;
+  color: white;
+}
+
+.item-1 {
+  background-color: green;
+}
+.item-2 {
+  background-color: red;
+}
