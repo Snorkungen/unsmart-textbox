@@ -5,26 +5,21 @@ import './style.css'
 const textBox = document.getElementById("textbox") as HTMLElement
 const colWidth = 80;
 
-const text = `#include <stdio.h>
-int main() {
-\tint t1 = 0, t2 = 1, nextTerm = 0, n;
-\tprintf("Enter a positive number: ");
-\tscanf("%d", &n);
+const text = `export const createElement = (
+\tparent: null | HTMLElement,
+\telemName: string,
+\t...attributes: Parameters<typeof attributesHandler>[1][]
+) => {
+\tconst element = document.createElement(elemName);
 
-\t// displays the first two terms which is always 0 and 1
-\tprintf("Fibonacci Series: %d, %d, ", t1, t2);
-\tnextTerm = t1 + t2;
+\tattributesHandler(element, ...attributes);
 
-\twhile (nextTerm <= n) {
-\t\tprintf("%d, ", nextTerm);
-\t\tt1 = t2;
-\t\tt2 = nextTerm;
-\t\tnextTerm = t1 + t2;
-\t}
+\tif (parent) {
+\t\tparent.appendChild(element);
+\t};
 
-\treturn 0;
-}
-`
+\treturn element;
+};`
 
 
 if (!(textBox instanceof HTMLElement)) {
@@ -98,7 +93,8 @@ const state = {
   row: 0,
   index: 0,
 
-  done: false
+  done: false,
+  history: [] as { row: number, index: number, expected: string, char: string, time: number }[]
 }
 
 function getActiveChar(): HTMLElement | undefined {
@@ -131,8 +127,6 @@ window.addEventListener("keydown", function (event) {
 
   const key = event.key
 
-
-  console.log(key)
   // ignore if special char
   if (key.length > 1 && ![NEW_LINE, TAB, BACKSPACE].includes(key)) {
     return;
@@ -156,7 +150,7 @@ window.addEventListener("keydown", function (event) {
 
     let el = getActiveChar()!
 
-    el.classList.remove("item-1" ,"item-2")
+    el.classList.remove("item-1", "item-2")
 
     setActive()
 
@@ -166,7 +160,13 @@ window.addEventListener("keydown", function (event) {
 
   let element = row.children[state.index] as HTMLElement;
 
-
+  state.history.push({
+    row: state.row,
+    index: state.index,
+    char: key,
+    expected: element.dataset!.char!.toString() ,
+    time: Date.now()
+  })
 
   element.classList.remove("item-active")
   if (element.dataset.char == key) {
@@ -185,6 +185,8 @@ window.addEventListener("keydown", function (event) {
 
   if (textBox.children.length - 1 < state.row) {
     state.done = true;
+
+    console.log(state)
   }
   setActive()
 
