@@ -1,4 +1,28 @@
+:root {
+  --success: green;
+  --warn: #e3e312;
+  --danger: red;
 
+  --bg: #232323;
+  --fg: #feefef;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+}
+
+*, *::after, *::before {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+body {
+  background-color: var(--bg);
+  color: var(--fg);
+}
 
 #textbox {
   padding: 1em;
@@ -8,13 +32,13 @@
 }
 
 .item-active {
-  background-color: black;
-  color: white;
+  background-color: var(--fg);
+  color: var(--bg);
 }
 
 .item-1 {
-  background-color: green;
+  background-color: var(--success);
 }
 .item-2 {
-  background-color: red;
+  background-color: var(--danger);
 }

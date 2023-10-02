@@ -3,6 +3,8 @@ import './style.css'
 
 
 const textBox = document.getElementById("textbox") as HTMLElement
+const informationContainer = document.getElementById("information-container") as HTMLElement;
+const timeElapsed = createElement(informationContainer, "p")
 const colWidth = 80;
 
 const text = `export const createElement = (
@@ -117,6 +119,10 @@ function setActive() {
 
 }
 
+function crunchState() {
+  console.log(state.history.length)
+}
+
 window.addEventListener("keydown", function (event) {
   event.stopImmediatePropagation()
   event.preventDefault()
@@ -164,7 +170,7 @@ window.addEventListener("keydown", function (event) {
     row: state.row,
     index: state.index,
     char: key,
-    expected: element.dataset!.char!.toString() ,
+    expected: element.dataset!.char!.toString(),
     time: Date.now()
   })
 
@@ -189,7 +195,7 @@ window.addEventListener("keydown", function (event) {
     console.log(state)
   }
   setActive()
-
+  crunchState()
 })
 
 setActive()
