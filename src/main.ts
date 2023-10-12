@@ -4,7 +4,10 @@ import './style.css'
 
 const textBox = document.getElementById("textbox") as HTMLElement
 const informationContainer = document.getElementById("information-container") as HTMLElement;
-const timeElapsed = createElement(informationContainer, "p")
+
+const timeElapsed = createElement(informationContainer, "p"),
+      keysPressed = createElement(informationContainer, "p")
+
 const colWidth = 80;
 
 const text = `export const createElement = (
@@ -121,6 +124,21 @@ function setActive() {
 
 function crunchState() {
   console.log(state.history.length)
+
+  if (state.history.length <= 0) {
+    return;
+  }
+
+  let ms = state.history[state.history.length - 1].time - state.history[0].time,
+      secs = ms / 1000;
+
+  timeElapsed.textContent = `${secs.toFixed(2)}s`
+
+  let keyPresseses = state.history.length;
+
+  keysPressed.textContent = `${keyPresseses} keys pressed`
+
+
 }
 
 window.addEventListener("keydown", function (event) {
