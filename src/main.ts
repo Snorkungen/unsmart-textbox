@@ -5,27 +5,34 @@ import './style.css'
 const textBox = document.getElementById("textbox") as HTMLElement
 const informationContainer = document.getElementById("information-container") as HTMLElement;
 
-const timeElapsed = createElement(informationContainer, "p"),
-  keysPressed = createElement(informationContainer, "p")
+// information container element
+const icelTimeElapsed = createElement(informationContainer, "p"),
+  icelKeysPressed = createElement(informationContainer, "p"),
+  icelAccuracy = createElement(informationContainer, "p")
 
 const colWidth = 80;
 
-const text = `export const createElement = (
-\tparent: null | HTMLElement,
-\telemName: string,
-\t...attributes: Parameters<typeof attributesHandler>[1][]
-) => {
-\tconst element = document.createElement(elemName);
+// const text = `export const createElement = (
+// \tparent: null | HTMLElement,
+// \telemName: string,
+// \t...attributes: Parameters<typeof attributesHandler>[1][]
+// ) => {
+// \tconst element = document.createElement(elemName);
 
-\tattributesHandler(element, ...attributes);
+// \tattributesHandler(element, ...attributes);
 
-\tif (parent) {
-\t\tparent.appendChild(element);
-\t};
+// \tif (parent) {
+// \t\tparent.appendChild(element);
+// \t};
 
-\treturn element;
-};`
+// \treturn element;
+// };`
 
+const text = `# Swap two variables
+def swap(a, b):
+\ttemp = a
+\ta = b
+\tb = temp`
 
 if (!(textBox instanceof HTMLElement)) {
   throw 0
@@ -92,15 +99,15 @@ function fillTextBox(textBox: HTMLElement, matrix: string[][]): boolean {
   return true;
 }
 
-fillTextBox(textBox!, processText(text))
-
 const state = {
   row: 0,
   index: 0,
-
+  matrix: processText(text),
   done: false,
-  history: [] as { row: number, index: number, expected: string, char: string, time: number }[]
+  history: [] as { row: number, index: number, expected: string, char: string, time: number, removed?: true }[]
 }
+
+fillTextBox(textBox!, state.matrix)
 
 function getActiveChar(): HTMLElement | undefined {
   if (state.done) {
@@ -122,9 +129,17 @@ function setActive() {
 
 }
 
-function crunchState() {
-  console.log(state.history.length)
+function getPositonInText({ matrix, row, index }: typeof state): number {
+  let pit = index;
 
+  for (let i = 0; i < row; i++) {
+    pit += matrix[i].length;
+  }
+
+  return pit;
+}
+
+function crunchState() {
   if (state.history.length <= 0) {
     return;
   }
@@ -132,16 +147,29 @@ function crunchState() {
   let ms = state.history[state.history.length - 1].time - state.history[0].time,
     secs = ms / 1000;
 
-  timeElapsed.textContent = `${secs.toFixed(2)}s`
+  icelTimeElapsed.textContent = `${secs.toFixed(2)}s`
 
   let keyPresseses = state.history.length;
 
-  keysPressed.textContent = `${keyPresseses} keys pressed`
+  icelKeysPressed.textContent = `${keyPresseses} keys pressed`
+
+  // total = is keysPressed - Backspace presses
+
+  //@ts-ignore | this uses type coercion
+  const rawAccuracy = state.history.reduce((sum, val) => sum + (val.char == val.expected), 0) / keyPresseses;
+
+  let posInText = getPositonInText(state);
+
+  //@ts-ignore | this uses type coercion
+  const realAccuracy = state.history.reduce((sum, val) => sum + (!val.removed & val.char == val.expected), 0) / posInText;
+
+  icelAccuracy.textContent =
+    `Real Accuracy: ${(realAccuracy * 100).toFixed(1)}% Raw Accuracy: ${(rawAccuracy * 100).toFixed(1)}%`
 
 
 }
 
-function ignoreKey(key: string) : boolean {
+function ignoreKey(key: string): boolean {
   if (key.length == 1) return false;
 
   switch (key) {
@@ -169,12 +197,6 @@ window.addEventListener("keydown", function (event) {
     return false;
   }
 
-
-  // ignore if special char
-  if (key.length > 1 && ![NEW_LINE, TAB, BACKSPACE].includes(key)) {
-    return;
-  }
-
   getActiveChar()!.classList.remove("item-active")
 
   let row = textBox.children[state.row];
@@ -194,6 +216,21 @@ window.addEventListener("keydown", function (event) {
     let el = getActiveChar()!
 
     el.classList.remove("item-1", "item-2")
+
+
+    if (state.history.length) {
+      let lastIndex = state.history.length - 1
+      while (lastIndex > 0) {
+        if (state.history[lastIndex].removed) {
+          lastIndex--;
+          continue;
+        }
+
+
+        state.history[lastIndex].removed = true;
+        break;
+      }
+    }
 
     setActive()
 
