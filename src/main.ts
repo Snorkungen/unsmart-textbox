@@ -10,7 +10,7 @@ const icelTimeElapsed = createElement(informationContainer, "p"),
   icelKeysPressed = createElement(informationContainer, "p"),
   icelAccuracy = createElement(informationContainer, "p")
 
-const colWidth = 80;
+const colWidth = 60;
 
 // const text = `export const createElement = (
 // \tparent: null | HTMLElement,
@@ -37,6 +37,8 @@ def swap(a, b):
 if (!(textBox instanceof HTMLElement)) {
   throw 0
 }
+
+textBox.style.setProperty("--col-width", colWidth.toString() + "ch")
 
 const NEW_LINE = "Enter"
 const TAB = "Tab"
@@ -153,8 +155,6 @@ function crunchState() {
 
   icelKeysPressed.textContent = `${keyPresseses} keys pressed`
 
-  // total = is keysPressed - Backspace presses
-
   //@ts-ignore | this uses type coercion
   const rawAccuracy = state.history.reduce((sum, val) => sum + (val.char == val.expected), 0) / keyPresseses;
 
@@ -215,7 +215,7 @@ window.addEventListener("keydown", function (event) {
 
     let el = getActiveChar()!
 
-    el.classList.remove("item-1", "item-2")
+    el.classList.remove("item-1", "item-12", "item-2")
 
 
     if (state.history.length) {
@@ -225,7 +225,6 @@ window.addEventListener("keydown", function (event) {
           lastIndex--;
           continue;
         }
-
 
         state.history[lastIndex].removed = true;
         break;
@@ -240,6 +239,18 @@ window.addEventListener("keydown", function (event) {
 
   let element = row.children[state.index] as HTMLElement;
 
+  element.classList.remove("item-active")
+  if (element.dataset.char == key) {
+    if (!!element.dataset.touched) {
+      element.classList.add("item-12")
+    } else {
+      element.classList.add("item-1")
+    }
+  } else {
+    element.classList.add("item-2")
+    element.dataset.touched = "1"
+  }
+
   state.history.push({
     row: state.row,
     index: state.index,
@@ -248,12 +259,6 @@ window.addEventListener("keydown", function (event) {
     time: Date.now()
   })
 
-  element.classList.remove("item-active")
-  if (element.dataset.char == key) {
-    element.classList.add("item-1")
-  } else {
-    element.classList.add("item-2")
-  }
   // Move Cursor IE state
 
   if (row.children.length - 1 > state.index) {

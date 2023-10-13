@@ -1,10 +1,18 @@
 :root {
   --success: green;
-  --warn: #e3e312;
+  --warn: #9f8115;
   --danger: red;
 
   --bg: #232323;
   --fg: #feefef;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #feefef;
+    --fg: #232323;
+    --warn: #e3e312;
+  }
 }
 
 html, body {
@@ -29,6 +37,12 @@ body {
   font-family: monospace;
 
   font-size: 1.4em;
+
+  max-width: var(--col-width, 80ch);
+
+  display: block;
+
+  margin: 0 auto;
 }
 
 .item-active {
@@ -38,6 +52,9 @@ body {
 
 .item-1 {
   background-color: var(--success);
+}
+.item-12 {
+  background-color: var(--warn);
 }
 .item-2 {
   background-color: var(--danger);
