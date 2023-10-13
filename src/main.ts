@@ -6,7 +6,7 @@ const textBox = document.getElementById("textbox") as HTMLElement
 const informationContainer = document.getElementById("information-container") as HTMLElement;
 
 const timeElapsed = createElement(informationContainer, "p"),
-      keysPressed = createElement(informationContainer, "p")
+  keysPressed = createElement(informationContainer, "p")
 
 const colWidth = 80;
 
@@ -130,7 +130,7 @@ function crunchState() {
   }
 
   let ms = state.history[state.history.length - 1].time - state.history[0].time,
-      secs = ms / 1000;
+    secs = ms / 1000;
 
   timeElapsed.textContent = `${secs.toFixed(2)}s`
 
@@ -141,7 +141,27 @@ function crunchState() {
 
 }
 
+function ignoreKey(key: string) : boolean {
+  if (key.length == 1) return false;
+
+  switch (key) {
+    case NEW_LINE:
+    case TAB:
+    case BACKSPACE:
+      return false
+
+    default: return true
+  }
+}
+
 window.addEventListener("keydown", function (event) {
+  const key = event.key
+
+
+  if (ignoreKey(key)) {
+    return;
+  }
+
   event.stopImmediatePropagation()
   event.preventDefault()
   if (state.done) {
@@ -149,7 +169,6 @@ window.addEventListener("keydown", function (event) {
     return false;
   }
 
-  const key = event.key
 
   // ignore if special char
   if (key.length > 1 && ![NEW_LINE, TAB, BACKSPACE].includes(key)) {
