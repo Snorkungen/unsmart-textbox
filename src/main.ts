@@ -8,7 +8,8 @@ const informationContainer = document.getElementById("information-container") as
 // information container element
 const icelTimeElapsed = createElement(informationContainer, "p"),
   icelKeysPressed = createElement(informationContainer, "p"),
-  icelAccuracy = createElement(informationContainer, "p")
+  icelAccuracy = createElement(informationContainer, "p"),
+  logEl = createElement(informationContainer, "div")
 
 const colWidth = 60;
 
@@ -28,11 +29,11 @@ const colWidth = 60;
 // \treturn element;
 // };`
 
-const text = `# Swap two variables
-def swap(a, b):
-\ttemp = a
-\ta = b
-\tb = temp`
+const texts = [
+  '<body>\n\t<div id="textbox"></div>\n\t<div id="information-container"></div>\n\t<script type="module" src="/src/main.ts"></script>\n</body>',
+  "# Swap two variables\ndef swap(a, b):\n\ttemp = a\n\ta = b\n\tb = temp",
+  "# create directory for http-file-server program\nif  [ ! -d $PATH_TO_HTTP_FILE_SERVER ]; then \n\tmkdir $PATH_TO_HTTP_FILE_SERVER\nfi\n\nif  [ ! -d $FILES_PATH ]; then\n\tmkdir -p $FILES_PATH\nfi"
+]
 
 if (!(textBox instanceof HTMLElement)) {
   throw 0
@@ -102,9 +103,10 @@ function fillTextBox(textBox: HTMLElement, matrix: string[][]): boolean {
 }
 
 const state = {
+  textIdx: 0,
   row: 0,
   index: 0,
-  matrix: processText(text),
+  matrix: processText(texts[0]),
   done: false,
   history: [] as { row: number, index: number, expected: string, char: string, time: number, removed?: true }[]
 }
@@ -141,32 +143,35 @@ function getPositonInText({ matrix, row, index }: typeof state): number {
   return pit;
 }
 
+function getStateInfo() {
+  let ms = state.history[state.history.length - 1].time - state.history[0].time,
+    secs = ms / 1000;
+
+  let keyPresseses = state.history.length;
+
+  //@ts-ignore | this uses type coercion
+  const rawAccuracy = state.history.reduce((sum, val) => sum + (val.char == val.expected), 0) / keyPresseses;
+
+
+  let posInText = getPositonInText(state);
+  //@ts-ignore | this uses type coercion
+  const realAccuracy = state.history.reduce((sum, val) => sum + (!val.removed & val.char == val.expected), 0) / posInText;
+
+  return {
+    secs, keyPresseses, rawAccuracy, realAccuracy
+  }
+}
+
 function crunchState() {
   if (state.history.length <= 0) {
     return;
   }
 
-  let ms = state.history[state.history.length - 1].time - state.history[0].time,
-    secs = ms / 1000;
-
+  const { keyPresseses, rawAccuracy, realAccuracy, secs } = getStateInfo();
   icelTimeElapsed.textContent = `${secs.toFixed(2)}s`
-
-  let keyPresseses = state.history.length;
-
   icelKeysPressed.textContent = `${keyPresseses} keys pressed`
-
-  //@ts-ignore | this uses type coercion
-  const rawAccuracy = state.history.reduce((sum, val) => sum + (val.char == val.expected), 0) / keyPresseses;
-
-  let posInText = getPositonInText(state);
-
-  //@ts-ignore | this uses type coercion
-  const realAccuracy = state.history.reduce((sum, val) => sum + (!val.removed & val.char == val.expected), 0) / posInText;
-
   icelAccuracy.textContent =
     `Real Accuracy: ${(realAccuracy * 100).toFixed(1)}% Raw Accuracy: ${(rawAccuracy * 100).toFixed(1)}%`
-
-
 }
 
 function ignoreKey(key: string): boolean {
@@ -271,7 +276,20 @@ window.addEventListener("keydown", function (event) {
   if (textBox.children.length - 1 < state.row) {
     state.done = true;
 
-    console.log(state)
+    const { keyPresseses, rawAccuracy, realAccuracy, secs } = getStateInfo();
+    let p = createElement(logEl, "p", {
+      children: [`${state.textIdx}: kp=${keyPresseses}, raw=${(rawAccuracy * 100).toFixed(1)}, real:${(realAccuracy * 100).toFixed(1)}, secs=${secs}`]
+    })
+    // purge and redo game
+    state.textIdx = (state.textIdx + 1) % texts.length;
+    state.done = false;
+    state.matrix = processText(texts[state.textIdx])
+    state.history = [];
+    state.index = 0;
+    state.row = 0;
+
+    textBox.innerHTML = ""
+    fillTextBox(textBox!, state.matrix)
   }
   setActive()
   crunchState()
